@@ -1,15 +1,11 @@
+# Bootstrapping - Control Node (Management Workstation)
+
+
+
 
 
 
 source ~/virtualenvs/ansible-venv/bin/activate
-
-# Bootstrapping - Control Node (Management Workstation)
-
-create an ansible user?
-generate key
-distribute key to managed hosts?
-
-
 
 # Bootstrapping - Managed Nodes
 

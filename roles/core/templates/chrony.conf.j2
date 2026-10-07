@@ -1,0 +1,17 @@
+# Ansible Managed File - Do not edit
+
+{% for server in chrony_ntpservers %}
+server {{ server }} iburst
+{% endfor %}
+
+driftfile {{ chrony_platform[ansible_facts.os_family].driftfile }}
+
+# Step the system clock during the first three updates
+# if the offset is greater than one second.
+makestep 1.0 3
+
+# Synchronise the hardware clock with the system clock.
+rtcsync
+
+# Record clock statistics.
+logdir /var/log/chrony

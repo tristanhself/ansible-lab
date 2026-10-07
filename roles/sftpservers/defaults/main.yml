@@ -1,0 +1,13 @@
+---
+sftp_user: webupload
+sftp_group: webcontent
+
+sftp_chroot_directory: /var/www
+sftp_upload_directory: /var/www/html/content
+sftp_internal_directory: /html/content
+
+sftp_service_name: sshd
+sftp_nologin_shell: /sbin/nologin
+
+sftp_authorized_keys:
+  - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIENk6l6uNq/CamdeMzasv2FvwaHgJXPKxYELEKtClhBx testws1-admin@testws1"

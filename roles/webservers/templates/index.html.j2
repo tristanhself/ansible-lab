@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>{{ web_page_title }}</title>
+</head>
+<body>
+  <h1>{{ web_page_heading }}</h1>
+
+  <p>{{ web_page_message }}</p>
+
+  <p>v2</p>
+
+  <dl>
+    <dt>Server</dt>
+    <dd>{{ inventory_hostname }}</dd>
+
+    <dt>Operating system</dt>
+    <dd>
+      {{ ansible_facts.distribution }}
+      {{ ansible_facts.distribution_version }}
+    </dd>
+  </dl>
+</body>
+</html>

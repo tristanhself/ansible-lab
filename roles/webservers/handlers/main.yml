@@ -1,0 +1,6 @@
+---
+- name: Restart Apache
+  ansible.builtin.service:
+    name: "{{ webserver_platform[ansible_facts.os_family].service }}"
+    state: restarted
+  listen: Apply web configuration

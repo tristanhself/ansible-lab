@@ -1,0 +1,8 @@
+---
+
+- name: "Sftpservers Play"
+  hosts:
+    - sftpservers
+  roles:
+    - name: "Sftpservers Role"
+      role: roles/sftpservers

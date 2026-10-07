@@ -1,0 +1,88 @@
+---
+
+- name: "Test Reachability"
+  ping:
+  tags:
+    - Reachability
+
+- name: "Display Operating System Family"
+  ansible.builtin.debug:
+    msg: "Operating System: {{ ansible_facts['os_family'] }}"
+
+- name: "Ensure SELinux Enabled and Enforcing"
+  become: true
+  block:
+    - name: "Enable SELinux on RHEL"
+      ansible.posix.selinux:
+        policy: targeted
+        state: enforcing
+      when: ansible_facts.os_family == "RedHat"
+      register: selinux_result
+    - name: "Reboot after enabling SELinux (if required)"
+      ansible.builtin.reboot:
+        msg: Rebooting to enable SELinux
+      when:
+        - selinux_result.reboot_required | default(false)
+    - name: "Display SELinux Status"
+      ansible.builtin.debug:
+        msg: "SELinux: {{ selinux_result.state }}"
+
+- name: Install Chrony (or Chronyd)
+  become: true
+  block:
+    - name: "Verify Chrony Defined for Operating System Family"
+      ansible.builtin.assert:
+        that:
+          - ansible_facts.os_family in chrony_platform
+        fail_msg: >-
+          Chrony installation is not defined for {{ ansible_facts.os_family }}.
+    - name: "Install Chrony (or Chronyd)"
+      become: true
+      ansible.builtin.package:
+        name: "{{ chrony_platform[ansible_facts.os_family].package }}"
+        state: present
+    - name: "Configure Chrony Config File"
+      ansible.builtin.template:
+        src: chrony.conf.j2
+        dest: "{{ chrony_platform[ansible_facts.os_family].config_path }}"
+        owner: root
+        group: root
+        mode: "0644"
+        backup: true
+      notify: Restart Chrony
+    - name: "Enable and Start Chrony"
+      ansible.builtin.service:
+        name: "{{ chrony_platform[ansible_facts.os_family].service }}"
+        state: started
+        enabled: true
+
+- name: "Configure firewalld"
+  become: true  
+  block:
+    - name: Install firewalld
+      ansible.builtin.package:
+        name: firewalld
+        state: present
+    - name: Permanently allow SSH before enabling firewalld
+      ansible.posix.firewalld:
+        zone: "{{ firewalld_zone }}"
+        service: ssh
+        state: enabled
+        permanent: true
+        offline: true
+    - name: Enable and start firewalld
+      ansible.builtin.service:
+        name: firewalld
+        state: started
+        enabled: true
+
+- name: Configure global sudo timestamp timeout
+  become: true
+  ansible.builtin.copy:
+    dest: /etc/sudoers.d/timestamp-timeout
+    content: |
+      Defaults timestamp_type=global,timestamp_timeout=60
+    owner: root
+    group: root
+    mode: "0440"
+    validate: '/usr/sbin/visudo -cf %s'

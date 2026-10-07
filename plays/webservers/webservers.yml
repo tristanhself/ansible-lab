@@ -1,0 +1,8 @@
+---
+
+- name: "Webservers Play"
+  hosts:
+    - webservers
+  roles:
+    - name: "Webservers Role"
+      role: roles/webservers

@@ -1,0 +1,22 @@
+---
+
+# Define variables for Chronyd configuration
+chrony_ntpservers:
+  - 0.uk.pool.ntp.org
+  - 1.uk.pool.ntp.org
+  - 2.uk.pool.ntp.org
+
+chrony_platform:
+  Debian:
+    package: chrony
+    service: chrony
+    config_path: /etc/chrony/chrony.conf
+    driftfile: /var/lib/chrony/chrony.drift
+  RedHat:
+    package: chrony
+    service: chronyd
+    config_path: /etc/chrony.conf
+    driftfile: /var/lib/chrony/drift
+
+# Define the Firewall Zone for firewalld
+firewalld_zone: public

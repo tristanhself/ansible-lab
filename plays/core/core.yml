@@ -1,0 +1,9 @@
+---
+
+- name: "Core Play"
+  hosts:
+    - webservers
+    - sftpservers
+  roles:
+    - name: "Core Role"
+      role: roles/core

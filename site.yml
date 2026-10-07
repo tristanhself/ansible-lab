@@ -1,0 +1,19 @@
+---
+
+# Site.yml all playbooks included here
+
+# $ ansible-playbook site.yml -i hosts -u username
+
+  - hosts: localhost
+    become: false
+    pre_tasks:
+      - name: Check Ansible Version
+        assert:
+          that:
+            - ansible_version.major == 2
+            - ( ansible_version.minor == 21 )
+          msg: "Ansible requires Ansible 2.21"
+
+  - import_playbook: plays/core/core.yml
+  - import_playbook: plays/webservers/webservers.yml
+  - import_playbook: plays/sftpservers/sftpservers.yml

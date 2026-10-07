@@ -1,0 +1,14 @@
+---
+webserver_platform:
+  Debian:
+    package: apache2
+    service: apache2
+  RedHat:
+    package: httpd
+    service: httpd
+
+webserver_firewalld_zone: public
+
+web_page_title: web01 Web Server
+web_page_heading: web01 Web Server
+web_page_message: Managed by Ansible.

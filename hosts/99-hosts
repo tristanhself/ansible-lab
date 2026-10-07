@@ -1,0 +1,6 @@
+[webservers]
+web01 ansible_host=192.168.102.201
+web02 ansible_host=192.168.102.202 
+
+[sftpservers]
+web01 ansible_host=192.168.102.201

@@ -1,0 +1,141 @@
+---
+- name: Verify the role is running on a supported OS
+  become: true
+  ansible.builtin.assert:
+    that:
+      - ansible_facts.os_family == "RedHat"
+    fail_msg: This internal SFTP role currently supports RHEL-family systems.
+
+- name: Check a SSH public key Provided
+  become: true
+  ansible.builtin.assert:
+    that:
+      - sftp_authorized_keys | length > 0
+    fail_msg: At least one key must be supplied in sftp_authorized_keys.
+
+- name: Install OpenSSH server
+  become: true
+  ansible.builtin.package:
+    name: openssh-server
+    state: present
+
+- name: Enable and start SSH
+  become: true
+  ansible.builtin.service:
+    name: "{{ sftp_service_name }}"
+    state: started
+    enabled: true
+
+- name: Create SFTP content group
+  become: true
+  ansible.builtin.group:
+    name: "{{ sftp_group }}"
+    state: present
+
+- name: Create restricted SFTP user
+  become: true
+  ansible.builtin.user:
+    name: "{{ sftp_user }}"
+    group: "{{ sftp_group }}"
+    home: "{{ sftp_internal_directory }}"
+    create_home: false
+    shell: "{{ sftp_nologin_shell }}"
+    password_lock: true
+    state: present
+
+- name: Ensure chroot directory is owned by root
+  become: true
+  ansible.builtin.file:
+    path: "{{ sftp_chroot_directory }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Ensure website document root exists
+  become: true
+  ansible.builtin.file:
+    path: /var/www/html
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Create SFTP upload directory
+  become: true
+  ansible.builtin.file:
+    path: "{{ sftp_upload_directory }}"
+    state: directory
+    owner: "{{ sftp_user }}"
+    group: "{{ sftp_group }}"
+    mode: "2750"
+
+- name: Create root-controlled authorised key directory
+  become: true
+  ansible.builtin.file:
+    path: /etc/ssh/authorized_keys
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Install SFTP authorised keys
+  become: true
+  ansible.builtin.copy:
+    dest: "/etc/ssh/authorized_keys/{{ sftp_user }}"
+    content: |
+      {% for key in sftp_authorized_keys %}
+      restrict {{ key }}
+      {% endfor %}
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Configure restricted internal SFTP access
+  become: true
+  ansible.builtin.blockinfile:
+    path: /etc/ssh/sshd_config
+    marker: "# {mark} ANSIBLE MANAGED INTERNAL SFTP"
+    insertafter: EOF
+    backup: true
+    validate: "/usr/sbin/sshd -t -f %s"
+    block: |
+      Match User {{ sftp_user }}
+          AuthenticationMethods publickey
+          PubkeyAuthentication yes
+          PasswordAuthentication no
+          KbdInteractiveAuthentication no
+
+          ChrootDirectory {{ sftp_chroot_directory }}
+          ForceCommand internal-sftp -u 0027 -d {{ sftp_internal_directory }}
+
+          AuthorizedKeysFile /etc/ssh/authorized_keys/%u
+
+          PermitTTY no
+          PermitUserRC no
+          AllowAgentForwarding no
+          AllowTcpForwarding no
+          AllowStreamLocalForwarding no
+          X11Forwarding no
+          PermitTunnel no
+
+      Match all
+  notify: Validate and reload SSH
+
+- name: Allow Apache to Read Uploaded SFTP Content
+  become: true
+  ansible.builtin.user:
+    name: apache
+    groups:
+      - "{{ sftp_group }}"
+    append: true
+  notify: Restart Apache
+
+- name: Restore standard SELinux website contexts
+  become: true
+  ansible.builtin.command:
+    cmd: "restorecon -RFv {{ sftp_upload_directory }}"
+  register: sftp_restorecon
+  changed_when: sftp_restorecon.stdout | length > 0
+  when:
+    - ansible_facts.selinux.status | default("disabled") == "enabled"
