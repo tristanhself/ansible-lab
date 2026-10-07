@@ -1,11 +1,19 @@
 # Bootstrapping - Control Node (Management Workstation)
 
+sudo apt update
+sudo apt install -y python3 python3-venv python3-pip openssh-client git
 
+mkdir ~/projects
+mkdir ~/virtualenvs
 
-
-
-
+cd ~/virtualenvs
+python3 -m venv ansible-venv
 source ~/virtualenvs/ansible-venv/bin/activate
+
+pip install -r requirements.txt
+
+Youl should now be all set to start developing, using this repository on your Control Node.
+
 
 # Bootstrapping - Managed Nodes
 
@@ -95,3 +103,16 @@ Assuming this runs, and shows the user "ansible" and doesn't ask for a password,
 ansible -i ~/projects/ansible-lab/hosts/99-hosts all -u ansible -b -m command -a "ls -l /root"
 
 And again, if we get the root user's home directory listed, its worked as expected.
+
+# Run Ansible Playbook
+
+To run the ansible-playbook, we can therefore do the following, we'll ensure we have got our environment ready for use first, just in case you are starting again from scratch here.
+
+source ~/virtualenvs/ansible-venv/bin/activate
+
+eval $(ssh-agent -s)
+ssh-add ~/.ssh/id_ed25519
+ssh-add -l
+
+cd ~/projects/ansible-lab
+ansible-playbook site.yml -i hosts -u ansible
