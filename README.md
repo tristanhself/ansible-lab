@@ -116,3 +116,28 @@ ssh-add -l
 
 cd ~/projects/ansible-lab
 ansible-playbook site.yml -i hosts -u ansible
+
+## Example ansible.cfg File
+
+A basic example ansible.cfg file, which means you would not need to specify things like the "inventory", or Ansible user as arguments on the command line each time.
+
+```
+[defaults]
+remote_user = ansible
+host_key_checking false
+inventory = inventory
+
+[privilege_escalation]
+become = True
+become_method = sudo
+become_user = root
+become_ask_pass = False
+```
+
+## Generate Example ansible.cfg File
+
+Generates an example ansible.cfg file, which has lots of settings in, can be useful for seeing what options you could have if you wanted to set them.
+
+```
+ansible-config init -t all > example-ansible.cfg
+```
