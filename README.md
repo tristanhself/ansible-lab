@@ -141,3 +141,44 @@ Generates an example ansible.cfg file, which has lots of settings in, can be use
 ```
 ansible-config init -t all > example-ansible.cfg
 ```
+
+## Ansible Collection Modules
+
+To list all the Ansible collection Modules that are available. It provides you with information about a module too, like arguments, options etc.
+
+```
+ansible-doc -l
+```
+
+If we wanted to look at the information for the ansible.posix module, we could run the following, the second command with the "-s" shows the arugments.
+
+```
+ansible-doc file
+ansible-doc -s file
+```
+
+Let's say you want to install one from the Ansible Galaxy, specifically one from a Collection. Because we don't have it available locally. You can find these on the website https://galaxy.ansible.com to see what all the collections are, and also find some additional documentation about it.
+
+See what modules you have installed on your system with:
+```
+ansible-galaxy collection list
+```
+
+If something you need is missing, you can install it with:
+
+```
+ansible-galaxy collection install ansible.posix
+```
+
+## Commonly Used Ansible Modules
+
+* command: runs arbitrary commands without a Linux Shell.
+* shell: runs arbitrary commands, but with a Linux Shell.
+* raw: runs commands directly via SSH without needing to have Python installed on the managed node; rare nowadays because Python is typically installed by default.
+* copy: copies files or linues of text into files.
+* package: allows you to manage packages on any managed Linux hosts, its package manager agnostic, so good for managing a mixed distribution environment
+* yum: allows you to manage packages on Linux hosts that use the yum environment
+* service: manages the state of packages, e.g. enabled.
+* ping: checks you can reach the host, i.e. host availability.
+* file: manages files
+* user: manages users
