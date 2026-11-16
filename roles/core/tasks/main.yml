@@ -23,9 +23,9 @@
         msg: Rebooting to enable SELinux
       when:
         - selinux_result.reboot_required | default(false)
-    - name: "Display SELinux Status"
-      ansible.builtin.debug:
-        msg: "SELinux: {{ selinux_result.state }}"
+    # - name: "Display SELinux Status"
+    #   ansible.builtin.debug:
+    #     msg: "SELinux: {{ selinux_result.state }}"
 
 - name: Install Chrony (or Chronyd)
   become: true
@@ -86,3 +86,23 @@
     group: root
     mode: "0440"
     validate: '/usr/sbin/visudo -cf %s'
+
+- name: Create a User based on Variable
+  become: true
+  block:
+    - name: Create User {{ variable_user }}
+      ansible.builtin.user:
+        name: "{{ variable_user }}"
+        shell: /bin/bash
+        state: present
+    # - name: Check if User Exists
+    #   ansible.builtin.getent:
+    #     database: passwd
+    #     key: "{{ variable_user }}"
+    #     fail_key: false
+    # - name: Show User Exist Result
+    #   ansible.builtin.debug:
+    #     msg: >-
+    #       User {{ variable_user }} is
+    #       {{ 'present' if variable_user in ansible_facts.getent_password else 'not present' }}
+ 

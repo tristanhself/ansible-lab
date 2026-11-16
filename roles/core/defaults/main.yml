@@ -20,3 +20,4 @@ chrony_platform:
 
 # Define the Firewall Zone for firewalld
 firewalld_zone: public
+

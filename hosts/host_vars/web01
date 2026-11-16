@@ -1,0 +1,2 @@
+# Define a username for a use in Create User Task
+variable_user: jimmy
